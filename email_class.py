@@ -9,9 +9,6 @@ import webbrowser
 class read_email:
     '''
     TODO:
-    1. fetch and read normal text emails
-    2. fetch and read html emails
-    3. find a way to convert html emails to text
     4. find a way to store emails as json 
     5. parse it to whatsapp and make a whatsapp bot
     6. real time fetching (how tho??)
@@ -33,7 +30,8 @@ class read_email:
 
     def search(self, key, val, scope):
         result, data = self.imap.search(None, key, f'{val}', scope)
-        return result, data
+        uid = [int(s) for s in data[0].split()]
+        return result, data, uid
 
     def obtain_header(self, msg):
         '''
@@ -47,9 +45,6 @@ class read_email:
         if isinstance(From, bytes):
             From = From.decode(encoding)
 
-        print("Subject: ", sub)
-        print("From: ", From)
-
         return sub, From
 
 
@@ -59,36 +54,30 @@ class read_email:
         TODO: implement later 
         '''
         pass
-    
-    def read_msgs(self, key="FROM", val="vitianscdc2023@vitstudent.ac.in", scope="UNSEEN", number_of_msgs=1):
-        typ, [msg_list] = self.search(key, val, scope)
+   
+    def get_body(self, msg):
+        for resp in msg:
+            if isinstance(resp, tuple):
+                msg = email.message_from_bytes(resp[1])
 
-        for i, num in enumerate(msg_list.split()[::-1]):
-            res, msg = self.imap.fetch(num, "(RFC822)")
-            print(debugColor.GREEN + str(i))
-            print(Style.RESET_ALL)
-            if i == number_of_msgs:
-                break
-            for resp in msg:
-                if isinstance(resp, tuple):
-                    msg = email.message_from_bytes(resp[1])
+                sub, From = self.obtain_header(msg)
+                print("Subject: ", sub)
+                print("From: ", From)
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        content_type = part.get_content_type()
+                        content_disposition = str(part.get("Content-Disposition"))
+                        try:
+                            body = part.get_payload(decode=True).decode()
+                        except:
+                            pass
 
-                    sub, From = self.obtain_header(msg)
+                        if content_type == "text/plain" and "attachment" not in content_disposition:
+                            return body, content_type
 
-                    if msg.is_multipart():
-                        for part in msg.walk():
-                            content_type = part.get_content_type()
-                            content_disposition = str(part.get("Content-Disposition"))
-                            try:
-                                body = part.get_payload(decode=True).decode()
-                            except:
-                                pass
 
-                            if content_type == "text/plain" and "attachment" not in content_disposition:
-                                print(body)
-
-                            elif "attachment" in content_disposition:
-                                self.download_attachment(part)
+                        elif "attachment" in content_disposition:
+                            self.download_attachment(part)
 
 #                            elif content_type == "text/html":
 #                                content_type = msg.get_content_type()
@@ -97,9 +86,28 @@ class read_email:
 #                                if content_type == "text/html":
 #                                    self.open_html(body, sub)
 #
-                            else:
-                                print(content_type)                     
+                        else:
+                            print(content_type)
 
+
+    def read_msgs(self, key="FROM", val="vitianscdc2023@vitstudent.ac.in", scope="UNSEEN", number_of_msgs=1):
+
+        typ, [msg_list], _ = self.search(key, val, scope)
+
+        for i, num in enumerate(msg_list.split()[::-1]):
+            res, msg = self.imap.fetch(num, "(RFC822)")
+            print(debugColor.GREEN + str(i))
+            print(Style.RESET_ALL)
+            if i == number_of_msgs:
+                break
+            try:
+                body, content_type = self.get_body(msg)
+                print(body)
+            except:
+                print("body is not parsing")
+            
+
+            
     def open_html(self, body, sub):
         '''
         replace this with webscrapping technique to scrape content alone
@@ -111,6 +119,10 @@ class read_email:
 
         open(filepath, "w").write(body)
         webbrowser.open(filepath)
-    
+
+    def logout(self):
+        self.imap.logout()
+        return 1
+
     def close(self):
         self.imap.close()
