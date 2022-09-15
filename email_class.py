@@ -17,18 +17,19 @@ class read_email:
     6. real time fetching (how tho??)
 
     '''
-    def __init__(self, username, password, email):
+    def __init__(self, username, password, email, Debug=0):
         self.username = username
         self.password = password
         self.email = email
+        self.debug = Debug
 
         self.imap = imaplib.IMAP4_SSL("imap.gmail.com")
-        self.imap.debug = 4
+        self.imap.debug = self.debug
         self.imap.login(self.username, self.password)
         self.status, self.messages = self.imap.select("INBOX")
         
         self.numOfMsgs = int(self.messages[0])
-        print(self.numOfMsgs)
+        #print(self.numOfMsgs)
 
     def search(self, key, val, scope):
         result, data = self.imap.search(None, key, f'{val}', scope)
@@ -59,14 +60,14 @@ class read_email:
         '''
         pass
     
-    def read_msgs(self, key="FROM", val="vitianscdc2023@vitstudent.ac.in", scope="UNSEEN"):
+    def read_msgs(self, key="FROM", val="vitianscdc2023@vitstudent.ac.in", scope="UNSEEN", number_of_msgs=1):
         typ, [msg_list] = self.search(key, val, scope)
 
         for i, num in enumerate(msg_list.split()[::-1]):
             res, msg = self.imap.fetch(num, "(RFC822)")
             print(debugColor.GREEN + str(i))
             print(Style.RESET_ALL)
-            if i == 1:
+            if i == number_of_msgs:
                 break
             for resp in msg:
                 if isinstance(resp, tuple):
@@ -99,7 +100,6 @@ class read_email:
                             else:
                                 print(content_type)                     
 
-
     def open_html(self, body, sub):
         '''
         replace this with webscrapping technique to scrape content alone
@@ -111,4 +111,6 @@ class read_email:
 
         open(filepath, "w").write(body)
         webbrowser.open(filepath)
-
+    
+    def close(self):
+        self.imap.close()

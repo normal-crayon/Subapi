@@ -10,4 +10,5 @@ user = 'prithviraj.2019@vitstudent.ac.in'
 password = 'cvojgbhrefysoypx'
 
 r = read_email(user, password, "vitianscdc2023@vitstudent.ac.in")
-r.read_msgs(scope="SEEN")
+r.read_msgs(scope="UNSEEN", number_of_msgs=10)
+r.close()
