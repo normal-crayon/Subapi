@@ -16,11 +16,11 @@ r = read_email(user, password, email, Debug=0)
 
 r.login()
 
-_, _, uid = r.search(key="FROM", val=email, scope="UNSEEN")
+_, _, uid = r.search(key="FROM", val=email, scope="SEEN")
 if uid:
     maxUid = max(uid)
-#print(maxUid)
-#r.fetch_for_uid(str(maxUid).encode())
+
+
 r.logout()
 
 

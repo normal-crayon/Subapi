@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import json
 import imaplib, email
 from email.header import decode_header
 from colorama import Fore as debugColor, Style
@@ -9,9 +9,10 @@ import webbrowser
 class read_email:
     '''
     TODO:
-    4. find a way to store emails as json 
-    5. parse it to whatsapp and make a whatsapp bot
-    6. real time fetching (how tho??)
+    * find a way to store emails as json 
+    * create fast api routes for getting json
+    * parse it to whatsapp and make a whatsapp bot (twilio)
+    * real time fetching (synchronous server works now, implement a IDLE based server later using "imapclient")
 
     '''
     def __init__(self, username, password, email, Debug=0):
@@ -72,7 +73,7 @@ class read_email:
                             body = part.get_payload(decode=True).decode()
                         except:
                             pass
-
+                        
                         if content_type == "text/plain" and "attachment" not in content_disposition:
                             return body, content_type
 
