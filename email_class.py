@@ -18,15 +18,16 @@ class read_email:
         self.username = username
         self.password = password
         self.email = email
-        self.debug = Debug
+        self.debug = Debug 
+
+    def login(self):
 
         self.imap = imaplib.IMAP4_SSL("imap.gmail.com")
         self.imap.debug = self.debug
         self.imap.login(self.username, self.password)
         self.status, self.messages = self.imap.select("INBOX")
-        
-        self.numOfMsgs = int(self.messages[0])
-        #print(self.numOfMsgs)
+           
+
 
     def search(self, key, val, scope):
         result, data = self.imap.search(None, key, f'{val}', scope)
@@ -41,7 +42,7 @@ class read_email:
         if isinstance(sub, bytes):
             sub = sub.decode(encoding)
 
-        From, encoding = decode_header(msg.get("From"))[0]
+        From, encoding = decode_header(msg["From"])[0]
         if isinstance(From, bytes):
             From = From.decode(encoding)
 
@@ -105,7 +106,16 @@ class read_email:
                 print(body)
             except:
                 print("body is not parsing")
-            
+
+    def fetch_for_uid(self, uid):
+        res, msg = self.imap.fetch(uid, "(RFC822)")
+        print(debugColor.GREEN + str("New message!!"))
+        print(Style.RESET_ALL)
+        try:
+            body, content_type = self.get_body(msg)
+            print(body)
+        except:
+            print("body not parsing for uid")
 
             
     def open_html(self, body, sub):
