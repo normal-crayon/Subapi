@@ -92,7 +92,7 @@ class read_email:
                             print(content_type)
 
 
-    def read_msgs(self, key="FROM", val, scope="UNSEEN", number_of_msgs=1):
+    def read_msgs(self, key, val, scope="UNSEEN", number_of_msgs=1):
 
         typ, [msg_list], _ = self.search(key, val, scope)
 
