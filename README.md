@@ -5,6 +5,7 @@ a simple imap client application for fetching CDC emails and sending them to wha
 For now a synchronous server, Later to implement IDLE for async mail fetching
 
 ## TODO:
+1. https://realpython.com/python-web-applications/ -- deply to gCloud
 2. API endpoints 
 3. whatsapp integration 
 4. code cleaning 
